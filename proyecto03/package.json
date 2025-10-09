@@ -1,18 +1,31 @@
 {
-  "name": "proyecto03",
+  "name": "senati",
   "version": "1.0.0",
-  "description": "proyecto de prueba quinto jueves",
-  "main": "app.js",
-  "scripts": {
-    "start": "nodemon app.js",
-    "dev": "nodemon app.js"
+  "description": "My project starting on GitHub",
+  "homepage": "https://github.com/MijhaelAnthony2125/Senati#readme",
+  "bugs": {
+    "url": "https://github.com/MijhaelAnthony2125/Senati/issues"
   },
-  "author": "Gerson Romero",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MijhaelAnthony2125/Senati.git"
+  },
   "license": "ISC",
+  "author": "Mj",
+  "type": "commonjs",
+  "main": "App.js",
+  "scripts": {
+    "start": "node App.js",
+    "dev": "nodemon App.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "devDependencies": {
     "nodemon": "^3.1.10"
   },
   "dependencies": {
-    "express": "^5.1.0"
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "mongoose": "^8.19.1",
+    "morgan": "^1.10.1"
   }
 }
