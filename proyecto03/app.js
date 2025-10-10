@@ -1,37 +1,49 @@
-const express=require('express')
-const app=express()
-const userRouter=require('./routers/userRouters')
-const morgan=require('morgan')
-const userLogin=require('./middlewares/userLogin')
-const path=require('path')
-const connection=require('./database/connection')
+const express = require('express')
+const app = express()
+const path = require('path')
 
-// 1. CONFIGURACIÓN DE MIDDLEWARES (CORREGIDO el orden)
-app.use(express.json()) // Debe ir al inicio para leer cuerpos JSON
-app.use(morgan('dev'))  // Para logging HTTP
-app.use(userLogin)      // Middleware de autenticación global
+const connection = require('./database/connection')
+const morgan = require('morgan')
 
-// Configuración de Vistas
-app.set('views',path.join(__dirname,'views'))
-app.set('view engine','ejs')
+const userLogin = require('./middlewares/userLogin')
+const userRouter = require('./routers/userRouters')
+const reviewRouter = require('./routers/reviewRouters')
+const productRouter = require('./routers/productRouters') 
 
-// 2. DEFINICIÓN DE RUTA RAÍZ (CORREGIDO: combinada y con sintaxis correcta)
-app.get('/',(req,res)=>{
-  console.log('Servidor creado con express.js') // El log se mueve aquí
-  const data={
-    "title":"Título de la pagina",
-    "message":"Bienvenido a mi sitios WEB",
-    "showMessage":true,
-    "items":[1,2,3,4,5]
-  }
-  // SINTAXIS CORREGIDA: Usando coma para pasar el objeto de datos
-  res.render('index', data) 
+
+app.set('views', path.join(__dirname, 'views'))
+app.set('view engine', 'ejs');
+
+
+app.get('/', (req, res) => {
+    const data = {
+        "title": "titulo de la pagina",
+        "message": "bienvenido a mi sitio WEB",
+        "showMessage": true,
+        "items": [1, 2, 3, 4, 5]
+    }
+    res.render('index', data);
 })
 
-// Uso del Router
+
+app.use(userLogin)
+app.use(morgan('dev'))
+app.use(express.json())
+
+
 app.use('/users', userRouter)
+app.use('/reviews', reviewRouter)
+app.use('/products', productRouter) 
 
-// Puerto de Escucha
-app.listen(3000, () => {
-    console.log('Aplicación con express ejecutándose en el puerto 3000')
-})
+
+connection
+    .then(() => {
+        app.listen(3000, () => {
+            console.log('Base de datos conectada.');
+            console.log('Aplicacion con express ejecutandose en el puerto 3000');
+        });
+    })
+    .catch(error => {
+        console.error('Error al conectar la base de datos. Servidor NO iniciado.', error);
+        process.exit(1);
+    });

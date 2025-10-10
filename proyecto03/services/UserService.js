@@ -9,16 +9,28 @@ class UserService {
     }
 
     async filterById(id) {
-        // Corrected findOne syntax
-        const user = await User.findOne({ _id: id }) 
+        const user = await User.findOne({ _id: id })
         return user
     }
 
     async create(data) {
-        // Corrected new User() syntax
         const user = new User(data)
         return await user.save()
     }
-}
+    
+    async update(id, data) {
+        const updatedUser = await User.findByIdAndUpdate(
+            id, 
+            data, 
+            { new: true } 
+        )
+        return updatedUser
+    }
 
+    async delete(id) {
+        return await User.deleteOne({
+            _id: id
+        });
+    }
+}
 module.exports = UserService
