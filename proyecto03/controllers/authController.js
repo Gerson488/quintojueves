@@ -5,7 +5,7 @@ const authService = new AuthService()
 exports.register = async (req, res) => {
     try {
         await authService.register(req.body)
-        res.status(201).json({ 'message': 'Usuario del administrador resgistrado' })
+        res.status(201).json({ 'message': 'Usuario del administrador registrado' })
     } catch (error) {
         res.status(500).json({ "error": error.message })
     }
@@ -19,7 +19,8 @@ exports.login = async(req, res) => {
             return res.status(400).json({"message":"Usuario del administrador no encontrado"})
         }
         const payload={
-            email:userAuth.email
+            email:userAuth.email,
+            rol:userAuth.rol
         }
         const token=authService.generateToken(payload)
         res.status(200).send(token)

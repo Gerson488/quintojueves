@@ -3,7 +3,8 @@ const Schema = mongoose.Schema
 
 const UserAuthSchema = new Schema({
     email: String,
-    password: String
+    password: String,
+    rol: { type: String, required: true } 
 })
 
 const UserAuth = mongoose.model('UserAuth', UserAuthSchema) 

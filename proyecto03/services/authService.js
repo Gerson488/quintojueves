@@ -17,8 +17,8 @@ class AuthService {
     }
 
     generateToken(payload) {
-        const token = jwt.sign(payload,'secret-key')
-        return token
+           const token = jwt.sign(payload, 'secret-key', { expiresIn: '1h' });
+           return token;
     }
 }
 
