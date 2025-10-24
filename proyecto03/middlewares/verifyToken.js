@@ -1,16 +1,27 @@
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = "secret-key"; 
+
 exports.verifyToken = (req, res, next) => {
-    const authorization = req.headers.authorization
-    console.log(authorization)
+    const authorization = req.headers.authorization;
+
     if (!authorization) {
-        res.status(401).json({ error: "Token no enviado" })
+        // CRÍTICO: Usar 'return'
+        return res.status(401).json({ error: "Token no enviado" });
     }
 
     try {
-        const token = authorization.split(" ")[1]
-        req.user = jwt.verify(token, "secret-key")
-        next()
+        const token = authorization.split(" ")[1];
+
+        if (!token) {
+            return res.status(401).json({ error: "Formato de token inválido (se esperaba 'Bearer token')" });
+        }
+        
+        req.user = jwt.verify(token, JWT_SECRET); 
+        
+        next();
+
     } catch (error) {
-        return res.status(400).json({ error: error.message })
+        // CRÍTICO: Usar 'return'
+        return res.status(403).json({ error: "Token inválido o expirado" });
     }
-}
+};

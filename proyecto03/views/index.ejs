@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Chatbox con IA Controlada</title>
+    <link rel="stylesheet" href="style.css"> 
 </head>
 <body>
 
@@ -14,61 +14,111 @@
         <div id="chat">
             <input type="text" id="username" placeholder="Ingrese su nombre de Usuario">
             <div id="messages">
-                <div class="message">LeonorSpna:Hola</div>
-                <div class="message">LeonorSpna:Hola</div>
             </div>
 
             <div id="writing">
-
             </div>
+            
             <textarea id ="write-message" placeholder="Ingrese su mensaje"></textarea>
+            <button id="send-message-btn">Enviar</button> 
+            
+            <button id="toggle-ai-btn" style="background-color: red; color: white;">
+                 IA Deshabilitada
+            </button> 
         </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        const socket=io()
-        const username=document.getElementById('username')
-        const writeMessage=document.getElementById('write-message')
-        const writing=document.getElementById('writing')
-        const messages=document.getElementById('messages')
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            const socket = io();
+            const username = document.getElementById('username');
+            const writeMessage = document.getElementById('write-message');
+            const writing = document.getElementById('writing');
+            const messages = document.getElementById('messages');
+            const sendMessageBtn = document.getElementById('send-message-btn');
+            
+            const toggleAiBtn = document.getElementById('toggle-ai-btn');
+            let isChatbotEnabled = false;
 
-        socket.on('all-messages',(m)=>{
-            let content=''
-            for(const message of m){
-                content+=`
-                <div class="message">
-                ${message.username}:${message.message}
-                </div>
-                <br>
-                `
-            }
-            messages.innerHTML=content
-            messages.scroll = messages.scrollHeight
-        })
+            const appendMessage = (message) => {
+                const messageHtml = `
+                    <div class="message">
+                        ${message.username}: ${message.message}
+                    </div>
+                    <br>
+                `;
+                messages.innerHTML += messageHtml;
+                messages.scrollTop = messages.scrollHeight; 
+            };
 
-        writeMessage.addEventListener('keydown',(event)=>{
-            socket.emit('writing', username.value)
-        })
+            socket.on('all-messages', (m) => {
+                let content = '';
+                for (const message of m) {
+                    content += `<div class="message">${message.username}: ${message.message}</div><br>`;
+                }
+                messages.innerHTML = content;
+                messages.scrollTop = messages.scrollHeight; 
+            });
+            
+            socket.on('new-message', (message) => {
+                appendMessage(message);
+                writing.innerHTML = '';
+            });
 
-        socket.on('writing',(username)=>{
-            writing.innerHTML=username+" esta escribiendo..."
-            setTimeout(()=>{
-                writing.innerHTML=''
-            },3000)
-        })
-        writeMessage.addEventListener('keyup',(event)=>{
-            if(event.code=="Enter"){
-                if(username.value=="" || writeMessage==""){
+            writeMessage.addEventListener('keydown', (event) => {
+                if (event.code !== "Enter") {
+                    socket.emit('writing', username.value)
+                }
+            });
+
+            socket.on('writing', (user) => {
+                writing.innerHTML = user + " está escribiendo...";
+                setTimeout(() => {
+                    writing.innerHTML = '';
+                }, 3000);
+            });
+            
+            const handleSendMessage = () => {
+                const user = username.value.trim();
+                const messageText = writeMessage.value.trim();
+                
+                if (user === "" || messageText === "") {
                     return alert('El nombre del usuario y el mensaje son requeridos')
                 }
-                socket.emit('new-message',{
-                    username:username.value,message:writeMessage.value.slice(0,-1)
+                
+                socket.emit('new-message', {
+                    username: user,
+                    message: messageText,
+                    respondWithAI: isChatbotEnabled 
                 })
-                writeMessage.value=""
-            }
-        })
+                
+                writeMessage.value = "";
+            };
 
+            writeMessage.addEventListener('keyup', (event) => {
+                if (event.code === "Enter") {
+                    event.preventDefault(); 
+                    handleSendMessage();
+                }
+            });
+            sendMessageBtn.addEventListener('click', handleSendMessage);
+            
+            toggleAiBtn.addEventListener('click', () => {
+                isChatbotEnabled = !isChatbotEnabled;
+                
+                if (isChatbotEnabled) {
+                    toggleAiBtn.textContent = ' IA Habilitada';
+                    toggleAiBtn.style.backgroundColor = 'green';
+                    appendMessage({username: 'Sistema', message: 'Chatbot (IA) ha sido ACTIVADO.'});
+                } else {
+                    toggleAiBtn.textContent = ' IA Deshabilitada';
+                    toggleAiBtn.style.backgroundColor = 'red';
+                    appendMessage({username: 'Sistema', message: 'Chatbot (IA) ha sido DESACTIVADO.'});
+                }
+            });
+        });
     </script>
 </body>
 </html>
